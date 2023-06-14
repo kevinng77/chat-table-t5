@@ -1,0 +1,10 @@
+Transaction_ID,Platform,Product_ID,User_ID,Transaction_Amount,Region,Transaction_Time,Transaction_Unit,User_Comments
+1,Apple,AAPL,123456,10.0,us,2022-12-01 12:00:00,EUR,N/A
+2,Google,GOOG,654321,5.0,ca,2022-12-02 09:00:00,USD,N/A
+3,Facebook,FB,111111,25.0,br,2022-12-03 15:00:00,GBP,N/A
+4,Microsoft,MSFT,222222,15.0,jp,2022-12-04 06:00:00,CNY,N/A
+5,Amazon,AMZN,333333,12.0,kr,2022-12-05 10:00:00,EUR,N/A
+6,Tesla,TSLA,444444,18.0,au,2022-12-06 17:00:00,JPY,N/A
+7,Apple,AAPL,123456,10.0,us,2022-12-07 08:00:00,EUR,N/A
+8,Google,GOOG,654321,5.0,ca,2022-12-08 13:00:00,USD,N/A
+9,Facebook,FB,111111,25.0,br,2022-12-09 16:00:00,GBP,N/A

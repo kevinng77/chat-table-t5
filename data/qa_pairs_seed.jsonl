@@ -1,0 +1,5 @@
+{"question": "Display the Platforms and their associated User_IDs.", "output": "SELECT Platform, User_ID FROM my_data GROUP BY Platform;"}
+{"question": "Please, find the average transaction amount for all regions.", "output": "SELECT AVG(Transaction_Amount) FROM my_data;"}
+{"question": "Display the top 5 transactions with the highest User_Comments.", "output": "SELECT * FROM my_data ORDER BY User_Comments DESC LIMIT 5;"}
+{"question": "Determine the number of transactions for each user.", "output": "SELECT User_ID, COUNT(Transaction_ID) AS transaction_count FROM my_data GROUP BY User_ID;"}
+{"question": "Find the average transaction amount for Users with Region 'North'.", "output": "SELECT AVG(Transaction_Amount) FROM my_data WHERE Region = 'North';"}
