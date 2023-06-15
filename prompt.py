@@ -12,12 +12,13 @@ Here are the requirements:
 2. The instruction should be 1 to 2 sentences long. Either an imperative sentence or a question is permitted.
 3. The output should be a syntactically correct SQL query, 
 4. This is important! Endeavor to refer to the table columns in a varied manner within the instructions, without adhering strictly to the exact column names. For instance, 'Product_ID' could be referred to as 'product id'.
+5. Do not add any "\\" in the output sql.
 
 List of 10 tasks:
 
 """
 
-PROMPT_INPUT = f"""Write a SQL query to answer the following question based a table named price_is, the columns of the table are list below:
+PROMPT_INPUT = f"""Write a SQL query to answer the following question based a table named {table_name}, the columns of the table are list below:
 {table_columns}
 
 Question: {{instruction}}"""

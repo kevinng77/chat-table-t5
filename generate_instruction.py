@@ -37,6 +37,7 @@ import pandas as pd
 from utils.data_utils import *
 from utils.database import init_sql_db
 import logging
+
 logging.basicConfig(level=logging.INFO)
 
 
@@ -55,10 +56,9 @@ def encode_prompt(prompt_instructions: List[dict]):
     return prompt
 
 
-def post_process_gpt3_response(num_prompt_instructions: int, response: LLMResult, sql_checker: any = None):
-    """
-    
-    """
+def post_process_gpt3_response(
+    num_prompt_instructions: int, response: LLMResult, sql_checker: any = None
+):
     if response is None:
         return []
 
@@ -128,7 +128,7 @@ def post_process_gpt3_response(num_prompt_instructions: int, response: LLMResult
             except Exception as err:
                 logging.warning(err)
                 continue
-        
+
         # If you would like to add additional "input", please refer to alpaca repo:
         # https://github.com/tatsu-lab/stanford_alpaca/blob/main/generate_instruction.py
         instructions.append({"instruction": inst, "input": "", "output": output})
@@ -139,14 +139,16 @@ def find_word_in_string(w, s):
     return re.compile(r"\b({0})\b".format(w), flags=re.IGNORECASE).search(s)
 
 
-def get_sql_checker(database_path=None):
+def get_sql_checker(csv_file_path=None, check_sql=None):
     """Get a SQL query check, TO check SQL, run `db.run(SQL_QUERY)`"""
-    if database_path is None:
+    if check_sql is None:
         logging.info(">>> Ignore SQL query check.")
         return None
-    logging.info(f">>> Check SQL Query based on database [{database_path}]")
-    df = pd.read_csv("data/mini_price_data.csv")
-    sql_engine = init_sql_db(table_name=table_name, df=df, database_path=database_path)
+    logging.info(f">>> Check SQL Query based on file [{csv_file_path}]")
+    df = pd.read_csv(csv_file_path)
+    sql_engine = init_sql_db(
+        table_name=table_name, df=df, database_path="data/sqlite_data.db"
+    )
     return sql_engine
 
 
@@ -158,10 +160,13 @@ def generate_instruction_following_data(
     model: BaseLLM = None,
     request_batch_size: int = 2,
     num_cpus: int = 1,
-    database_path: Union[str, None] = None
+    csv_file_path: Union[str, None] = None,
+    check_sql: bool = False
 ):
     seed_tasks = [json.loads(l) for l in open(seed_tasks_path, "r")]
-    seed_instruction_data = [{"instruction": t["question"], "output": t["output"]} for t in seed_tasks]
+    seed_instruction_data = [
+        {"instruction": t["question"], "output": t["output"]} for t in seed_tasks
+    ]
     logging.info(f"Loaded {len(seed_instruction_data)} human-written seed instructions")
 
     os.makedirs(output_dir, exist_ok=True)
@@ -170,7 +175,9 @@ def generate_instruction_following_data(
     machine_instruction_data = []
     if os.path.exists(os.path.join(output_dir, "regen.json")):
         machine_instruction_data = jload(os.path.join(output_dir, "regen.json"))
-        logging.info(f"Loaded {len(machine_instruction_data)} machine-generated instructions")
+        logging.info(
+            f"Loaded {len(machine_instruction_data)} machine-generated instructions"
+        )
 
     # similarities = {}
     scorer = rouge_scorer.RougeScorer(["rougeL"], use_stemmer=False)
@@ -188,7 +195,7 @@ def generate_instruction_following_data(
     all_instruction_tokens = [
         scorer._tokenizer.tokenize(inst) for inst in all_instructions
     ]
-    sql_checker = get_sql_checker(database_path=database_path)
+    sql_checker = get_sql_checker(csv_file_path=csv_file_path, check_sql=check_sql)
 
     while len(machine_instruction_data) < num_instructions_to_generate:
         request_idx += 1
@@ -204,7 +211,7 @@ def generate_instruction_following_data(
 
         request_start = time.time()
 
-        results = model.generate(batch_inputs)        
+        results = model.generate(batch_inputs)
         request_duration = time.time() - request_start
 
         process_start = time.time()
@@ -257,8 +264,6 @@ def generate_instruction_following_data(
 
 
 def load_model(
-    openai_api_base: str,
-    openai_api_key: str,
     model_name: str,
     temperature: float,
     top_p: float,
@@ -267,8 +272,6 @@ def load_model(
 ):
     # Change the LLM you want to used for sample generation. i.e.
     model = OpenAI(
-        openai_api_key=openai_api_key,
-        openai_api_base=openai_api_base,
         model_name=model_name,
         temperature=temperature,
         top_p=top_p,
@@ -282,26 +285,24 @@ def load_model(
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output_dir", type=str, default="localhost")
-    parser.add_argument("--seed_tasks_path", type=str, default="data/qa_pairs_seed.jsonl")
+    parser.add_argument(
+        "--seed_tasks_path", type=str, default="data/qa_pairs_seed.jsonl"
+    )
     parser.add_argument("--num_instructions_to_generate", type=int, default=20)
     parser.add_argument("--num_prompt_instructions", type=int, default=4)
     parser.add_argument("--request_batch_size", type=int, default=1)
-    parser.add_argument("--model_name", type=str, default="vicuna-7b-v1.1")
+    parser.add_argument("--model_name", type=str, default="gpt-4")
     parser.add_argument("--temperature", type=float, default=0.7)
     parser.add_argument("--top_p", type=float, default=0.95)
     parser.add_argument("--num_cpus", type=int, default=1)
     parser.add_argument("--max_tokens", type=int, default=1024)
-    parser.add_argument("--database_path", type=str, default=None)
-    parser.add_argument("--check_sql", action='store_true')
+    parser.add_argument("--csv_file_path", type=str, default=None)
+    parser.add_argument("--check_sql", action="store_true")
 
     args = parser.parse_args()
 
-    openai_api_base = "http://localhost:5001/v1"
-    openai_api_key = "your api key"
 
     model = load_model(
-        openai_api_base=openai_api_base,
-        openai_api_key=openai_api_key,
         model_name=args.model_name,
         temperature=args.temperature,
         top_p=args.top_p,
@@ -310,9 +311,7 @@ def main():
     )
 
     logging.info(f"args: {args}")
-    if not args.check_sql:
-        args.database_path = None
-        
+
     generate_instruction_following_data(
         output_dir=args.output_dir,
         seed_tasks_path=args.seed_tasks_path,
@@ -321,7 +320,8 @@ def main():
         model=model,
         request_batch_size=args.request_batch_size,
         num_cpus=args.num_cpus,
-        database_path=args.database_path
+        csv_file_path=args.csv_file_path,
+        check_sql=args.check_sql
     )
 
 

@@ -1,16 +1,16 @@
 python train.py \
     --run_name flan-t5-base\
-    --model_name_or_path google/flan-t5-large \
+    --model_name_or_path google/flan-t5-base \
+    --cache_dir cache \
     --overwrite_output_dir \
     --train_data_path ./data/price_is.json \
-    --dev_data_path ./data/dev_price_is.json \
     --bf16 True \
-    --output_dir ./output_new \
+    --output_dir ./output_test \
     --num_train_epochs 30 \
     --per_device_train_batch_size 16 \
     --per_device_eval_batch_size 16 \
     --gradient_accumulation_steps 4 \
-    --evaluation_strategy "steps" \
+    --evaluation_strategy "no" \
     --save_strategy "steps" \
     --save_steps 4000 \
     --save_total_limit 1 \
@@ -19,5 +19,4 @@ python train.py \
     --warmup_ratio 0.1 \
     --lr_scheduler_type "cosine" \
     --logging_steps 10 \
-    --eval_steps 200\
     --tf32 True

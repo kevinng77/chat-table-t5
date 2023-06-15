@@ -33,7 +33,6 @@ DEFAULT_UNK_TOKEN = "<unk>"
 from prompt import PROMPT_INPUT
 
 
-
 @dataclass
 class ModelArguments:
     model_name_or_path: Optional[str] = field(default="google/flan-t5-large")
@@ -156,7 +155,10 @@ class DataCollatorForSupervisedDataset(object):
 def make_supervised_data_module(tokenizer: transformers.PreTrainedTokenizer, data_args) -> Dict:
     """Make dataset and collator for supervised fine-tuning."""
     train_dataset = SupervisedDataset(tokenizer=tokenizer, data_path=data_args.train_data_path)
-    dev_dataset = SupervisedDataset(tokenizer=tokenizer, data_path=data_args.dev_data_path)
+    if data_args.dev_data_path:
+        dev_dataset = SupervisedDataset(tokenizer=tokenizer, data_path=data_args.dev_data_path)
+    else:
+        dev_dataset = None
     data_collator = DataCollatorForSupervisedDataset(tokenizer=tokenizer)
     return dict(train_dataset=train_dataset, eval_dataset=dev_dataset, data_collator=data_collator)
 
@@ -175,7 +177,6 @@ def train():
         cache_dir=training_args.cache_dir,
         model_max_length=training_args.model_max_length,
         padding_side="right",
-        # use_fast=False,
     )
     special_tokens_dict = dict()
     if tokenizer.pad_token is None:
