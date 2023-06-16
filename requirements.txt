@@ -1,6 +1,7 @@
 numpy
 rouge_score
 transformers>=4.28.1
+langchain
 torch
 sentencepiece
 tokenizers>=0.13.3
