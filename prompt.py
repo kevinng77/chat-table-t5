@@ -18,7 +18,10 @@ List of 10 tasks:
 
 """
 
-PROMPT_INPUT = f"""Write a SQL query to answer the following question based a table named {table_name}, the columns of the table are list below:
+PROMPT_INPUT = f"""
+Given a SQL table named '{table_name}' with the following columns:
 {table_columns}
 
-Question: {{instruction}}"""
+Construct a SQL query to answer the following question:
+Q: {{instruction}}.
+"""
