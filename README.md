@@ -75,5 +75,22 @@ python train.py \
     --tf32 True
 ```
 
- 
+## Inference
+
+```python
+from transformers import T5Tokenizer, T5ForConditionalGeneration, pipeline
+from prompt import PROMPT_INPUT
+
+model_id = "your_model_output_dir"
+tokenizer = T5Tokenizer.from_pretrained(model_id)
+model = T5ForConditionalGeneration.from_pretrained(model_id)
+
+input_text = PROMPT_INPUT.format_map({"question": "how many rows are there in the table?"})
+
+pipe = pipeline(
+    "text2text-generation",
+    model=model, tokenizer=tokenizer, max_length=512
+)
+print(pipe(input_text))
+```
 

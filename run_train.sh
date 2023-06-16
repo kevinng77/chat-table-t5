@@ -1,15 +1,14 @@
 python train.py \
     --run_name flan-t5-base\
     --model_name_or_path google/flan-t5-base \
-    --cache_dir cache \
     --overwrite_output_dir \
-    --train_data_path ./data/price_is.json \
+    --train_data_path ./data/regen.json \
     --bf16 True \
-    --output_dir ./output_test \
-    --num_train_epochs 30 \
-    --per_device_train_batch_size 16 \
-    --per_device_eval_batch_size 16 \
-    --gradient_accumulation_steps 4 \
+    --output_dir ./output \
+    --num_train_epochs 20 \
+    --per_device_train_batch_size 8 \
+    --per_device_eval_batch_size 8 \
+    --gradient_accumulation_steps 8 \
     --evaluation_strategy "no" \
     --save_strategy "steps" \
     --save_steps 4000 \
